@@ -1,117 +1,160 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_playout/player_state.dart';
 
-void main() {
-  runApp(MyApp());
-}
+import 'audio.dart';
+import 'video.dart';
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+void main() => runApp(MainApp());
+
+class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      title: "AV Playout",
+      home: PlayoutExample(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class PlayoutExample extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PlayoutExampleState createState() => _PlayoutExampleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class _PlayoutExampleState extends State<PlayoutExample> {
+  PlayerState _desiredState = PlayerState.PLAYING;
+  bool _showPlayerControls = true;
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
+        brightness: Brightness.dark,
+        backgroundColor: Colors.grey[900],
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {},
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.favorite),
+            onPressed: () async {
+              // pause playback
+              setState(() {
+                _desiredState = PlayerState.PAUSED;
+              });
+              // wait for user to come back from navigated screen
+              await Navigator.push(context, MaterialPageRoute<void>(
+                builder: (context) {
+                  return Scaffold(
+                    appBar: AppBar(),
+                    body: Container(
+                      child: Center(
+                        child: AudioPlayout(
+                          desiredState: _desiredState,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ));
+              // user is back. resume playback
+              setState(() {
+                _desiredState = PlayerState.PLAYING;
+              });
+            },
+          ),
+          /* toggle show player controls */
+          IconButton(
+            icon: Icon(Icons.adjust),
+            onPressed: () async {
+              setState(() {
+                _showPlayerControls = !_showPlayerControls;
+              });
+            },
+          ),
+        ],
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Icon(
+              Icons.local_play,
+              color: Colors.white,
+            ),
+            Container(
+              width: 7.0,
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              "AV Player",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: Colors.white),
+            )
+          ],
+        ),
+      ),
+      body: Container(
+        color: Colors.black,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(17.0, 33.0, 17.0, 0.0),
+                child: Text(
+                  "Video Player",
+                  style: Theme.of(context).textTheme.headline4.copyWith(
+                      color: Colors.pink[500], fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(17.0, 0.0, 17.0, 30.0),
+                child: Text(
+                  "Plays video from a URL with background audio support and lock screen controls.",
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      color: Colors.white70, fontWeight: FontWeight.w400),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+                child: VideoPlayout(
+              desiredState: _desiredState,
+              showPlayerControls: _showPlayerControls,
+            )),
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(17.0, 23.0, 17.0, 0.0),
+                child: Text(
+                  "Audio Player",
+                  style: Theme.of(context).textTheme.headline4.copyWith(
+                      color: Colors.pink[500], fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(17.0, 0.0, 17.0, 30.0),
+                child: Text(
+                  "Plays audio from a URL with background audio support and lock screen controls.",
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      color: Colors.white70, fontWeight: FontWeight.w400),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: AudioPlayout(
+                desiredState: _desiredState,
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
