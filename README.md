@@ -23,6 +23,8 @@
   - https://medium.com/@danle.sdev/widget-hide-and-seek-a-guide-to-managing-flutter-widgets-visibility-d7977cbaf444
 - Fade a widget in and out | Flutter.dev
   - https://flutter.dev/docs/cookbook/animation/opacity-animation
+- IconButton | Flutter Doc JP
+  - https://flutter.ctrnost.com/basic/interactive/form/button/
 
 ## Other Reference
 
@@ -49,3 +51,6 @@ Not actually used in this project.
   - https://pub.dev/packages/video_player
 - Create an awesome background running Music Player like Amazon Music in Flutter | Medium
   - https://itnext.io/create-an-awesome-background-running-music-player-like-amazon-music-in-flutter-341a59efa936
+
+## Application Images
+![image1.png](https://github.com/JUNKI555/flutter_practice04/blob/main/image1.png)
