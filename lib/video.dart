@@ -27,6 +27,7 @@ class _VideoPlayoutState extends State<VideoPlayout>
   List<HLSManifestLanguage> _hlsLanguages = List<HLSManifestLanguage>();
 
   bool _isPlaying = false;
+  int _rotate = 0;
 
   @override
   void initState() {
@@ -46,35 +47,42 @@ class _VideoPlayoutState extends State<VideoPlayout>
     return Container(
       child: Column(
         children: <Widget>[
-          new Stack(
-            children: <Widget>[
-              /* player */
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Video(
-                  autoPlay: true,
-                  showControls: widget.showPlayerControls,
-                  title: "MTA International",
-                  subtitle: "Reaching The Corners Of The Earth",
-                  preferredAudioLanguage: "eng",
-                  isLiveStream: true,
-                  position: 0,
-                  url: _url,
-                  onViewCreated: _onViewCreated,
-                  desiredState: widget.desiredState,
-                  preferredTextLanguage: "en",
-                ),
+          RotatedBox(
+              child: Stack(
+                children: <Widget>[
+                  /* player */
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Video(
+                      autoPlay: true,
+                      showControls: widget.showPlayerControls,
+                      title: "MTA International",
+                      subtitle: "Reaching The Corners Of The Earth",
+                      preferredAudioLanguage: "eng",
+                      isLiveStream: true,
+                      position: 0,
+                      url: _url,
+                      onViewCreated: _onViewCreated,
+                      desiredState: widget.desiredState,
+                      preferredTextLanguage: "en",
+                    ),
+                  ),
+                  Positioned(
+                    top: 40.0,
+                    left: 5.0,
+                    child: AnimatedOpacity(
+                        opacity: _isPlaying ? 0.0 : 1.0,
+                        duration: Duration(milliseconds: 200),
+                        child: IconButton(
+                          iconSize: 20,
+                          onPressed: _onPressedRotate,
+                          color: Colors.grey,
+                          icon: Icon(Icons.fit_screen),
+                        )),
+                  ),
+                ],
               ),
-              Positioned(
-                top: 40.0,
-                left: 5.0,
-                child: AnimatedOpacity(
-                    opacity: _isPlaying ? 0.0 : 1.0,
-                    duration: Duration(milliseconds: 200),
-                    child: new Icon(Icons.fit_screen)),
-              ),
-            ],
-          ),
+              quarterTurns: _rotate),
           /* multi language menu */
           _hlsLanguages.length < 2 && !Platform.isIOS
               ? Container()
@@ -99,6 +107,12 @@ class _VideoPlayoutState extends State<VideoPlayout>
         ],
       ),
     );
+  }
+
+  void _onPressedRotate() {
+    setState(() {
+      _rotate = _rotate == 0 ? 1 : 0;
+    });
   }
 
   void _onViewCreated(int viewId) {
